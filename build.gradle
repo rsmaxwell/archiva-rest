@@ -1,0 +1,63 @@
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.apache.logging.log4j:log4j-core:3.0.0-beta2'
+    
+	compileOnly 'org.projectlombok:lombok:1.18.34'
+	annotationProcessor 'org.projectlombok:lombok:1.18.34'
+	
+    implementation libs.guava
+    implementation 'org.apache.logging.log4j:log4j-api:3.0.0-beta2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+ext {
+    projectVersion = project.hasProperty('projectVersion') ? project.getProperty('projectVersion') : "0.0.1-SNAPSHOT"
+    repositoryName = project.hasProperty('repositoryName') ? project.getProperty('repositoryName') : "snapshots"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = projectArtifactId
+            groupId = projectGroupId
+            version = projectVersion
+
+            from components["java"]
+        }
+    }
+
+    repositories {
+        maven {
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+
+            url = "${mavenRepositoryBaseURL}/${repositoryName}"
+            allowInsecureProtocol = true
+        }
+    }
+}
